@@ -1,0 +1,128 @@
+/* reset browser styles */
+html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp,small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	vertical-align: baseline;
+}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1.2;
+}
+ol { 
+	padding-left: 1.4em;
+	list-style: decimal;
+}
+ul {
+	padding-left: 1.4em;
+	list-style: square;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+} 
+/* end reset browser styles */
+
+html {
+	background: rgb(66, 94, 146);
+}
+
+body {
+	max-width: 1024px;
+	margin: 0 auto;
+}
+
+header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  padding: 10px 0 10px;
+  background: rgb(95, 225, 217);
+}
+
+header h1 {
+	font-size: 200%;
+	text-align:  center;
+	color: rgb(30,30,30);
+	text-shadow: 0 0 5px white,
+	             3px 3px 5px rgba(0,0,0,.5);
+}
+			 
+.container {
+	margin-top: 60px;
+	padding-top: 30px;
+}
+			 
+.game-wrapper {
+	width: 80%;
+	margin: auto;
+}
+
+canvas {
+	display: block;
+	float: left;
+	border: 3px solid rgba(95, 225, 217,0.5);
+	border-radius: 20px;
+	padding: 0;
+}
+
+.sidebar {
+	background: #f7fad1;
+	width: 20%;
+	float: right;
+	padding: 0;
+	border:  3px solid black;
+	margin: 0;
+}
+
+.sidebar h3 {
+	background:  rgb(95, 225, 217);
+	border-bottom:  solid rgb(66, 94, 146) 3px;
+	margin-top: 0;
+	padding-top: 5px;
+	padding bottom: 5px;
+	text-align: center;
+}
+
+.sidebar p, .sidebar ul {
+	font: normal;
+	padding: 5px;
+}
+
+.sidebar ul {
+	margin-left: 12px;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px;
+    background-color: rgb(95, 225, 217);
+}
+
+footer .copyright {
+	font-family: Arial, sans-serif;
+	font-weight: 700;
+	color: rgb(30,30,30);
+	margin: 0 auto;
+	max-width: 1024px;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:link { color: rgb(0,100,200); }
+a:visited { color: rgb(0,100,120); }
+a:hover { color: #F33; }
+a:active {color: #B2F511; }

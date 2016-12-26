@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Haverbeke Game</title>
+<script src="code/chapter/15_game.js"></script>
+<script src="code/game_levels.js"></script>
+<script src="code/chapter/16_canvas.js"></script>
+<link rel="stylesheet" type="text/css" href="css/game.css">
+</head>
+
+<body>
+	
+<header>
+	<h1 class = "title">Marijn Haverbeke's Platform Game</h1>
+</header>
+  <div class="container">
+    <div class="game-wrapper"></div>
+    <div class = "sidebar">
+	  <h3>Rules</h3>
+		  <ul>
+			  <li>Move with left, right and up-arrow keys.</li>
+			  <li>Gobble up the all gold coins to move to the next level.</ii>  
+			  <li>Avoid the flaming lava.</li>
+			  <li>You are awarded an extra life when you pass a level.</li>
+		  </ul>
+	  <h3>Your Game Status</h3>
+	  <p class="message"></p>
+    </div>
+  </div>
+<footer>
+<div class="copyright">
+<p>Licensed under <a href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons</a>.  Game from <a href="http://eloquentjavascript.net"><em>Eloquent Javascript</em></a>, by Marijn Haverbeke.</p>
+</div>
+</footer>
+
+<script>
+    runGame(GAME_LEVELS, CanvasDisplay, 3);
+</script>
+
+
+  
+</body>
+<html>
