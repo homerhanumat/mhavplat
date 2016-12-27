@@ -26,6 +26,13 @@
 		  </ul>
 	  <h3>Your Game Status</h3>
 	  <p class="message"></p>
+	  <div id="pausedoptions">
+	   <h3>Options</h3>
+	   <ul>
+		   <li><button id="savegame">Save Game</button></li>
+		   <li><button id="revert">Revert to Saved Game</li>
+		   <li><a id="download" href="">Download Saved Game</a></li>
+	  </ul>
     </div>
   </div>
 <footer>
@@ -36,7 +43,19 @@
 
 <script>
   var initialLives = 3;
-  runGame(GAME_LEVELS, CanvasDisplay, initialLives);
+  var reset = false;
+  
+  /* sidebar element that gives options upon pause */
+  var pausedOptions = document.querySelector("#pausedoptions");
+  
+  var saveButton = document.querySelector("#savegame");
+  var revertButton = document.querySelector("#revert");
+
+  
+  
+  var state = { plans:  GAME_LEVELS, lives: initialLives };
+  
+  runGame(state, CanvasDisplay);
 </script>
 
 

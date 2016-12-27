@@ -1,20 +1,12 @@
-var simpleLevelPlan = [
-  "                      ",
-  "                      ",
-  "  x              = x  ",
-  "  x         o o    x  ",
-  "  x @      xxxxx   x  ",
-  "  xxxxx            x  ",
-  "      x!!!!!!!!!!!!x  ",
-  "      xxxxxxxxxxxxxx  ",
-  "                      "
-];
 
-function Level(plan) {
+
+function Level(plans) {
+  var plan = plans[0];
   this.width = plan[0].length;
   this.height = plan.length;
   this.grid = [];
   this.actors = [];
+  this.emptyplan = [];
 
   for (var y = 0; y < this.height; y++) {
     var line = plan[y], gridLine = [];
@@ -31,6 +23,14 @@ function Level(plan) {
     }
     this.grid.push(gridLine);
   }
+  
+  // make copy of current array with the Player removed
+  var emptyPlan = [];
+  plans[0].forEach(function(line) {
+	  emptyPlan.push(line.replace(/[@o=|v]/g, " "));
+  });
+  // copy of the current playerless plan, plus all subsequent plans:
+  this.allPlans = [emptyPlan].concat(plans.slice(1));
 
   this.player = this.actors.filter(function(actor) {
     return actor.type == "player";
@@ -38,7 +38,27 @@ function Level(plan) {
   this.status = this.finishDelay = null;
 }
 
+Level.prototype.savePlans = function() {
+	var currentPlan = [];
+	this.allPlans[0].forEach(function(item) {
+		currentPlan.push(item);
+	});
+	for (actor in this.actors) {
+		var x = Math.round(this.actors[actor].pos.x), y = Math.round(this.actors[actor].pos.y);
+		var line = currentPlan[y];
+		currentPlan[y] = line.slice(0,x) + this.actors[actor].ch + line.slice(x+1);
+	};	
+	var playerX = Math.round(this.player.pos.x), playerY = Math.round(this.player.pos.y);
+	currentPlan[playerY] = line.slice(0,playerX) + this.player.ch + line.slice(playerX+1);
+	return [currentPlan].concat(this.allPlans.slice(1));
+};
+
 Level.prototype.isFinished = function() {
+	if (reset) {
+		reset = false;
+		this.status = "reset";
+		return true;
+	};
   return this.status != null && this.finishDelay < 0;
 };
 
@@ -59,6 +79,7 @@ var actorChars = {
 };
 
 function Player(pos) {
+  this.ch = "@";
   this.pos = pos.plus(new Vector(0, -0.5));
   this.size = new Vector(0.8, 1.5);
   this.speed = new Vector(0, 0);
@@ -66,6 +87,7 @@ function Player(pos) {
 Player.prototype.type = "player";
 
 function Lava(pos, ch) {
+  this.ch = ch;
   this.pos = pos;
   this.size = new Vector(1, 1);
   if (ch == "=") {
@@ -80,13 +102,13 @@ function Lava(pos, ch) {
 Lava.prototype.type = "lava";
 
 function Coin(pos) {
+  this.ch = "o";
   this.basePos = this.pos = pos.plus(new Vector(0.2, 0.1));
   this.size = new Vector(0.6, 0.6);
   this.wobble = Math.random() * Math.PI * 2;
 }
 Coin.prototype.type = "coin";
 
-var simpleLevel = new Level(simpleLevelPlan);
 
 function elt(name, className) {
   var elt = document.createElement(name);
@@ -330,47 +352,130 @@ function runAnimation(frameFunc) {
 var arrows = trackKeys(arrowCodes);
 
 function runLevel(level, Display, andThen) {
+	
   var wrapper = document.querySelector(".game-wrapper");
   var display = new Display(wrapper, level);
-  runAnimation(function(step) {
+  var running = "yes";
+  function handleKey(event) {
+    if (event.keyCode == 27) {
+      if (running == "no") {
+        running = "yes";
+        runAnimation(animation);
+      } else if (running == "pausing") {
+        running = "yes";
+      } else if (running == "yes") {
+        running = "pausing";
+      }
+    }
+  }
+
+  addEventListener("keydown", handleKey);
+  var arrows = trackKeys(arrowCodes);
+
+  function animation(step) {
+    if (running == "pausing") {
+      running = "no";
+      return false;
+    }
     level.animate(step, arrows);
     display.drawFrame(step);
     if (level.isFinished()) {
       display.clear();
+      // Here we remove all our event handlers
+      removeEventListener("keydown", handleKey);
+      arrows.unregister(); // (see change to trackKeys below)
       if (andThen)
         andThen(level.status);
       return false;
     }
-  });
+  }
+  var reset = runAnimation(animation);
+  if (reset) return reset;
 }
 
+function trackKeys(codes) {
+  var pressed = Object.create(null);
+  function handler(event) {
+    if (codes.hasOwnProperty(event.keyCode)) {
+      var state = event.type == "keydown";
+      pressed[codes[event.keyCode]] = state;
+      event.preventDefault();
+    }
+  }
+  addEventListener("keydown", handler);
+  addEventListener("keyup", handler);
+
+  // This is new -- it allows runLevel to clean up its handlers
+  pressed.unregister = function() {
+    removeEventListener("keydown", handler);
+    removeEventListener("keyup", handler);
+  };
+  // End of new code
+  return pressed;
+}
+
+
+/* ********************************************** */
+/* Updates current game-status in the sidebar */
 function updateStatus(message) {
 	var el = document.querySelector("p.message");
 	el.innerHTML = message;
 }
 
-function runGame(plans, Display, lives) {
-    function startLevel(n,lives) {
-	  message = "This is level " + n + ". You have " + lives +" lives.";
+
+
+
+/* ******************************************** */
+/* Primary function to run the game */
+function runGame(state, Display) {
+	
+    function startLevel(plans, lives) {
+	
+	  var lives = state.lives;
+		
+	  message = "This is level " + (5-plans.length) + ". You have " + lives +" lives.";
 	  updateStatus(message);
-      runLevel(new Level(plans[n]), Display, function(status) {
-        if (status == "lost") {
-          lives -= 1;
-          if (lives) startLevel(n,lives);
+	  var level = new Level(plans);
+	  
+	  function saveState() {
+	    state.plans = level.savePlans();
+	    state.lives = lives;
+	  };
+	  
+	  function resetGame() {
+		reset = true;
+	  };
+	  
+      saveButton.addEventListener("click", saveState);
+      revertButton.addEventListener("click", resetGame);
+	  
+      runLevel(level, Display, function(status) {
+		  
+		saveButton.removeEventListener("click", saveState);
+		revertButton.removeEventListener("click", resetGame);
+		
+		if (status == "reset") {
+			startLevel(state.plans,state.lives);
+		}
+        else if (status == "lost") {
+          state.lives -= 1;
+		  freshPlans = GAME_LEVELS.slice(4-state.plans.length); // start from beginning of level
+          if (lives) startLevel(freshPlans, state.lives);
           else {
 			updateStatus("Game over.")
             return null;
           }
         }
-        else if (n < plans.length - 1) {
-		  lives += 1;
+        else if (plans.length > 0) {
+		  state.lives += 1;
 		  message = "Congrats!  You move to a new level and  get an extra life.";
 		  updateStatus(message);
-          startLevel(n + 1, lives);
+		  state.plans.shift();
+          startLevel(state.plans, state.lives);
 	    }
         else
 			updateStatus("You win!!");
       });
-    }
-    startLevel(0,lives);
+  }
+      startLevel(state.plans,state.lives);
   }
